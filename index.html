@@ -39,20 +39,21 @@
     }
 
     function showError(error) {
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          out.textContent = "Location denied. This can happen if the user blocked it or if iframe permissions prevent geolocation.";
-          break;
-        case error.POSITION_UNAVAILABLE:
-          out.textContent = "Location unavailable.";
-          break;
-        case error.TIMEOUT:
-          out.textContent = "Location request timed out.";
-          break;
-        default:
-          out.textContent = "Unknown geolocation error.";
-      }
-    }
+  if (error.code === error.PERMISSION_DENIED) {
+    out.textContent =
+      "Location denied. On Trimble Connect mobile this likely means geolocation is blocked for the embedded iframe, not necessarily that the user rejected the prompt.";
+    return;
+  }
+  if (error.code === error.POSITION_UNAVAILABLE) {
+    out.textContent = "Location unavailable.";
+    return;
+  }
+  if (error.code === error.TIMEOUT) {
+    out.textContent = "Location request timed out.";
+    return;
+  }
+  out.textContent = "Unknown geolocation error.";
+}
 
     document.getElementById("locBtn").addEventListener("click", () => {
       if (!window.isSecureContext) {
@@ -74,6 +75,15 @@
     });
 
     init();
+    console.log("secure?", window.isSecureContext);
+    console.log("geolocation exists?", !!navigator.geolocation);
+
+    if (document.permissionsPolicy) {
+      console.log("allowed features", document.permissionsPolicy.allowedFeatures?.());
+    }
+    if (document.featurePolicy) {
+      console.log("geolocation allowed?", document.featurePolicy.allowsFeature?.("geolocation"));
+    }
   </script>
 </body>
 </html>
